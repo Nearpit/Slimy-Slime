@@ -14,21 +14,25 @@ public class PlayerControl : MonoBehaviour
     Vector3 objectPlace = Vector3.zero;
     bool isString;
     bool isFirst;
-    int hp = 10;
-    int gnum = 3;
-    int got = 0;
-    int[,] tokenArray = new int[,] { { -3,0 },{ 5,0 } };
+    bool isFuelGot = false;
+    private int hp = 10;
+    int woodnum = 3;
+    int[,] woodArray = new int[,] { { -3,0 },{ 5,0 } ,{ 5, 2 } };
     [SerializeField] GameObject oblast;
-    [SerializeField] GameObject goal;
+    [SerializeField] GameObject wood;
+    [SerializeField] GameObject fuel;
+    [SerializeField] GameObject fireplace;
+    [SerializeField] GameObject psaver;
     [SerializeField] Tilemap tilemap;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        for (int i = 1; i < gnum; i++)
+        for (int i = 0; i < woodnum; i++)
         {
-            Instantiate(goal, new Vector3(0,0), Quaternion.identity);
+            Instantiate(wood, new Vector3(woodArray[i,0],woodArray[i, 1]), Quaternion.identity);
         }
+        Instantiate(fuel, new Vector3(-5,3), Quaternion.identity);
     }
 
     private void Update()
@@ -40,6 +44,13 @@ public class PlayerControl : MonoBehaviour
         }
 
         
+    }
+    public void AddHP(int amount)
+    {   
+        if (hp < 10)
+        {
+            hp += amount;
+        }
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -55,15 +66,19 @@ public class PlayerControl : MonoBehaviour
                 tilemap.ClearAllTiles();
             }
         }
-        if (collision.gameObject.name == goal.name + "(Clone)" || collision.gameObject.name == goal.name)
+        if (collision.gameObject.name == wood.name + "(Clone)" || collision.gameObject.name == wood.name)
         {
-            got++;
-            if (got == gnum)
-            {
-                Debug.Log("WIN");
-            }
+            psaver.GetComponent<ProgressSaver>().AddWood(1);
             collision.gameObject.SetActive(false);
         }
+        if (collision.gameObject.name == fuel.name + "(Clone)" || collision.gameObject.name == fuel.name)
+        {
+            psaver.GetComponent<ProgressSaver>().AddFuel(1);
+            psaver.GetComponent<ProgressSaver>().characterData.isFuelGot = true;
+            collision.gameObject.SetActive(false);
+        }
+
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -94,13 +109,16 @@ public class PlayerControl : MonoBehaviour
             objectPlace.x = hitsum.x / hitnum;
             objectPlace.y = hitsum.y / hitnum;
             Instantiate(oblast, objectPlace, Quaternion.identity);
-            Vector3Int vec = Vector3Int.zero;
+            isFirst = true;
+            /*Vector3Int vec = Vector3Int.zero;
             objectPlace = tilemap.WorldToCell(objectPlace);
             vec.x = Mathf.RoundToInt(objectPlace.x);
             vec.y = Mathf.RoundToInt(objectPlace.y);
             Debug.Log(vec);
             tilemap.SetTile(vec, null);
-            isFirst = true;
+            isFirst = true;*/
+            hp -= 1;
+            Debug.Log(hp);
         }
     }
 
