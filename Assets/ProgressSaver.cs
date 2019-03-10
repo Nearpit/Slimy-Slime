@@ -9,7 +9,7 @@ public class ProgressSaver : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -49,7 +49,7 @@ public class ProgressSaver : MonoBehaviour
     {
         CharacterData loadedCharacter = new CharacterData();
         loadedCharacter.wood_gathered = PlayerPrefs.GetInt("wood_gathered_CharacterSlot" + characterSlot);
-        loadedCharacter.wood_gathered = PlayerPrefs.GetInt("wood_gathered_CharacterSlot" + characterSlot);
+        loadedCharacter.fuel_gathered = PlayerPrefs.GetInt("fuel_gathered_CharacterSlot" + characterSlot);
 
         return loadedCharacter;
     }

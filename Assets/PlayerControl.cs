@@ -14,7 +14,7 @@ public class PlayerControl : MonoBehaviour
     Vector3 objectPlace = Vector3.zero;
     bool isString;
     bool isFirst;
-    bool isFuelGot = false;
+    bool SafePlace = true;
     private int hp = 10;
     int woodnum = 3;
     int[,] woodArray = new int[,] { { -3,0 },{ 5,0 } ,{ 5, 2 } };
@@ -23,6 +23,7 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] GameObject fuel;
     [SerializeField] GameObject fireplace;
     [SerializeField] GameObject psaver;
+    [SerializeField] GameObject trace;
     [SerializeField] Tilemap tilemap;
 
     private void Awake()
@@ -32,7 +33,8 @@ public class PlayerControl : MonoBehaviour
         {
             Instantiate(wood, new Vector3(woodArray[i,0],woodArray[i, 1]), Quaternion.identity);
         }
-        Instantiate(fuel, new Vector3(-5,3), Quaternion.identity);
+        Instantiate(fuel, new Vector3(-2,0), Quaternion.identity);
+        trace.SetActive(false);
     }
 
     private void Update()
@@ -54,7 +56,10 @@ public class PlayerControl : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.name == oblast.name + "(Clone)" || collision.gameObject.name == oblast.name)
+        if (collision.gameObject.name == fireplace.name){
+            SafePlace = true;
+        }
+        if ((collision.gameObject.name == oblast.name + "(Clone)" || collision.gameObject.name == oblast.name) && !SafePlace)
         {
             if (isFirst)
             {
@@ -80,8 +85,15 @@ public class PlayerControl : MonoBehaviour
 
 
     }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.name == fireplace.name)
+        {
+            SafePlace = false;
+        }
+    }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+        private void OnCollisionEnter2D(Collision2D collision)
     {
         rb.constraints = RigidbodyConstraints2D.FreezeAll;
 
@@ -127,18 +139,28 @@ public class PlayerControl : MonoBehaviour
         mousePosition = Input.mousePosition;
         mousePosition.z = 10.0f;
         mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        Vector3 cour = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+
+        var angle = -Mathf.Atan2(cour.x, cour.y) * Mathf.Rad2Deg - 90;
+        trace.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
         if (Input.GetMouseButtonDown(0) && Vector3.Distance(mousePosition, transform.position) < 1.5f)
         {
+
             isString = true;
+            trace.SetActive(true);
         }
 
-        if (Input.GetMouseButtonUp(0) && isString == true)
+        if (Input.GetMouseButtonUp(0))
         {
-            rb.constraints = RigidbodyConstraints2D.None;
-            forceDirection = transform.position - mousePosition;
-            rb.AddForce(Vector3.ClampMagnitude(forceDirection, 1.5f) * 100.0f * speed);
-            isString = false;
+            if (isString == true && Vector3.Distance(mousePosition, transform.position) < 1.5f)
+            {
+                rb.constraints = RigidbodyConstraints2D.None;
+                forceDirection = transform.position - mousePosition;
+                rb.AddForce(Vector3.ClampMagnitude(forceDirection, 1.5f) * 100.0f * speed);
+                isString = false;
+            }
+            trace.SetActive(false);
         }
     }
 
